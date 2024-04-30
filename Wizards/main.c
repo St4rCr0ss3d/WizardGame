@@ -121,9 +121,41 @@ int main() {
         }else{
             printf("Invalid choice.\n");
         }
+    }else{
+        //test case
+        critter* w = createWizard("Gandalf the Grey", 0);
+        item i1;
+        charArrayCpy(i1.name, "Minor Healing Potion", MAX_NAME_SIZE);
+        i1.type = 1;
+        i1.affinity = 1;
+        item i2;
+        charArrayCpy(i2.name, "Glock 43X MOS", MAX_NAME_SIZE);
+        i2.type = 2;
+        i2.affinity = 4;
+        printf("Wizard: %s\tSanity: %.1lf\nTotal Aetherium: %d\nInventory Size: %d\n",w->name,w->hp.sanity, sumAether(w->wiz->Aeth), w->inventorySize);
+        addItemToInventory(w, i1);
+        addItemToInventory(w, i2);
+        addItemToInventory(w, i1);
+        addItemToInventory(w, i1);
+        printf("1.%s > %d\n2.%s > %d\n3.%s > %d\n4.%s > %d\n", w->inventory[0].name, w->inventory[0].type, w->inventory[1].name, w->inventory[1].type, w->inventory[2].name, w->inventory[2].type, w->inventory[3].name, w->inventory[3].type);
+        effect e;
+        charArrayCpy(e.name, "Plot Armor", MAX_NAME_SIZE);
+        e.type = 1;
+        e.duration = -1;
+        addEffect(w, e);
+        printf("Status Effect:\na) %s\t Duration: %d\n", w->activeEffects[0].name, w->activeEffects[0].duration);
+
+        map m = createMap(25); //Sweats in Spanish
+        for(int i =0; i < 25; i++){
+            printf("%d -> ", m.nodeList[i].type);
+            for(int j =0; j < m.nodeList[i].numConnections; j++){
+                printf("%d, ", m.nodeList[i].connectedNodes[j]->type);
+            }
+            printf("\n");
+        }
     }
 
-    //system("pause");
+    system("pause");
 
     //Create Threads
     if(isMultiplayer && !isServer){

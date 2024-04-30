@@ -1,14 +1,17 @@
-#include "wizard.h"
+#include "map.h"
 
 typedef struct gameLogicStruct
 {
     int day;
-    wizard *player;
+    critter* player;
     /* data */
 }gameData;
 
 
-void initializeGame(){
+void initializeGame(int mapSize, int numPlayers){
+    //Create wizards
+
+    //Generate map
 
 }
 
