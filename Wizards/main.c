@@ -122,8 +122,8 @@ int main() {
             printf("Invalid choice.\n");
         }
     }else{
-        //test case
-        critter* w = createWizard("Gandalf the Grey", 0);
+        //OLD TESTS FOR WIZARD CREATION AND INVENTORY MANAGMENT
+        /*critter* w = createWizard("Gandalf the Grey", 0);
         item i1;
         charArrayCpy(i1.name, "Minor Healing Potion", MAX_NAME_SIZE);
         i1.type = 1;
@@ -152,7 +152,23 @@ int main() {
                 printf("%d, ", m.nodeList[i].connectedNodes[j]->type);
             }
             printf("\n");
-        }
+        }*/
+        /* TEST FOR ADDING AND SUBTRACTING AETHER
+        unsigned int test1 = createAffinities(1);
+        unsigned int test2 = createAffinities(2);
+        unsigned int test3 = createAffinities(3);
+        unsigned int test4 = createAffinities(7);
+        unsigned int test5 = 0x123456;
+        printf("test 1: %d\ntest 2: %d\ntest 3: %d\ntest 4: %d\ntest 5: %d\n", sumAether(test1), sumAether(test2), sumAether(test3), sumAether(test4), sumAether(test5));
+        unsigned int test6 = addAether(3, test5);
+        unsigned int test7 = addAether(1, test1);
+        unsigned int test8 = addAether(4, test2);
+        printf("test 6: %d\ntest 7: %d\ntest 8: %d\n", sumAether(test6), sumAether(test7), sumAether(test8));
+        unsigned int test9 = subAether(2, test8);
+        unsigned int test10 = subAether(1, test1);
+        unsigned int test11 = subAether(4, test6);
+        printf("test 9: %d\ntest 10: %d\ntest 11: %d\n", sumAether(test9), sumAether(test10), sumAether(test11));
+        */
     }
 
     system("pause");

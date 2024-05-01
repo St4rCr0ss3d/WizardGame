@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define MAX_EFFECTS 20
 #define MAX_NAME_SIZE 25
 
@@ -20,13 +19,6 @@ typedef struct effectStruct
     int duration; // -1 - n/a
 }effect;
 
-//magic junk
-typedef struct AetheriumStruct
-{
-    int ltAeth, dkAeth, fiAeth, wtAeth, erAeth, arAeth;
-    int enigma;
-}Aetherium;
-
 //nonmagic things
 typedef struct itemStruct{
     char name[MAX_NAME_SIZE];
@@ -34,10 +26,24 @@ typedef struct itemStruct{
     int affinity; // -1 - no affinity
 }item;
 
+//very magic things
+typedef struct spellStruct
+{
+    //what is it
+    char name[MAX_NAME_SIZE];
+    unsigned char type; // 0 - effect, 1 - damage, 2 - damage+effect, 3 - summon
+    unsigned int affinities; //bit 0-3 - Air, 4-7 - Dark, 8-11 - Earth, 12-15 - fire, 16-19 - Light, 20-23 - water, 24-27 - enigma, 28-31 - chaos/neutral
+    int range; //0 - self, 1+ num tiles
+    void* effectOrSummon; //what are you creating or adding to that location
+    int mystDrain;
+    double castChance;
+}spell;
+
 //contains all stats pertaining solely to wizards
 typedef struct wizardStruct
 {
-    Aetherium Aeth;
+    int maxMyst;
+    unsigned int affinities; //bit 0-3 - Air, 4-7 - Dark, 8-11 - Earth, 12-15 - fire, 16-19 - Light, 20-23 - water, 24-27 - enigma, 28-31 - chaos/neutral
 }wizardStats;
 
 //all data needed for any living thing
@@ -74,72 +80,59 @@ int charArrayCpy(char* dest, char* source, int destLen){
     return 0;
 }
 
-int sumAether(Aetherium a){
-    int total = a.arAeth + a.dkAeth + a.erAeth + a.fiAeth + a.ltAeth + a.wtAeth;
+int sumAether(unsigned int AetheriumCount){
+    int total = 0;
+    for(int i = 0; i < 6; i++){
+        unsigned int tmp = AetheriumCount;
+        tmp = (tmp >> (i*4)) & 0xF;
+        total+= tmp;
+    }
     return total;
 }
 
-Aetherium createAetherium(int startingType){
-    Aetherium a;
-    a.enigma = 0;
+//Aeth - 1 - Air, 2 - Dark, 3 - Earth, 4 - fire, 5 - Light, 6 - water, 7 - enigma
+unsigned int addAether(int AethType, unsigned int affinities){
+    AethType--;//switch for bitwise operation
+    affinities = affinities + (1 << (AethType*4));
+    return affinities;
+}
+
+//Aeth - 1 - Air, 2 - Dark, 3 - Earth, 4 - fire, 5 - Light, 6 - water, 7 - enigma 
+unsigned int subAether(int AethType, unsigned int affinities){
+    AethType--;//switch for bitwise operation
+    //check if zero aether of type
+    if((affinities >> (AethType*4)) & 0xF){
+        affinities = affinities - (1 << (AethType*4));
+    }else{
+        printf("Error: no Aether of this type\n");
+    }
+    return affinities;
+}
+//bit 0-3 - Air, 4-7 - Dark, 8-11 - Earth, 12-15 - fire, 16-19 - Light, 20-23 - water, 24-27 - enigma, 28-31 - SPELLS
+unsigned int createAffinities(int startingType){
+    unsigned int a;
     switch (startingType)
     {
     case 1:
-        a.arAeth = 1;
-        a.dkAeth = 0;
-        a.erAeth = 0;
-        a.fiAeth = 0;
-        a.ltAeth = 0;
-        a.wtAeth = 0;
+        a = 0x1;
         break;
     case 2:
-        a.arAeth = 0;
-        a.dkAeth = 1;
-        a.erAeth = 0;
-        a.fiAeth = 0;
-        a.ltAeth = 0;
-        a.wtAeth = 0;
+        a = 0x10;
         break;
     case 3:
-        a.arAeth = 0;
-        a.dkAeth = 0;
-        a.erAeth = 1;
-        a.fiAeth = 0;
-        a.ltAeth = 0;
-        a.wtAeth = 0;
+        a = 0x100;
         break;
     case 4:
-        a.arAeth = 0;
-        a.dkAeth = 0;
-        a.erAeth = 0;
-        a.fiAeth = 1;
-        a.ltAeth = 0;
-        a.wtAeth = 0;
+        a = 0x1000;
         break;
     case 5:
-        a.arAeth = 0;
-        a.dkAeth = 0;
-        a.erAeth = 0;
-        a.fiAeth = 0;
-        a.ltAeth = 1;
-        a.wtAeth = 0;
+        a = 0x10000;
         break;
     case 6:
-        a.arAeth = 0;
-        a.dkAeth = 0;
-        a.erAeth = 0;
-        a.fiAeth = 0;
-        a.ltAeth = 0;
-        a.wtAeth = 1;
+        a = 0x100000;
         break;
     default:
-        a.arAeth = 1;
-        a.dkAeth = 1;
-        a.erAeth = 1;
-        a.fiAeth = 1;
-        a.ltAeth = 1;
-        a.wtAeth = 1;
-        a.enigma = 1;
+        a = 0x1111111;
         break;
     }
     return a;
@@ -226,7 +219,7 @@ critter* createWizard(char* name, int startingAeth){
     //hp
     c->hp = createHealth(100, 100.0, 50);
     //Aeth
-    c->wiz->Aeth = createAetherium(startingAeth);
+    c->wiz->affinities = createAffinities(startingAeth);
     //effects
     c->activeEffects = (effect*)malloc(MAX_EFFECTS*sizeof(effect));
     for (int i = 0; i < MAX_EFFECTS; i++){
